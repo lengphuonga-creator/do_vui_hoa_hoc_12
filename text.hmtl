@@ -1,0 +1,465 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Đố Vui Hóa Học - Ester & Lipid</title>
+
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      min-height: 100vh;
+      font-family: Inter, "Segoe UI", Arial, sans-serif;
+      background:
+        radial-gradient(circle at 15% 20%, rgba(96, 165, 250, .18), transparent 28%),
+        radial-gradient(circle at 85% 80%, rgba(168, 85, 247, .18), transparent 30%),
+        linear-gradient(135deg, #0f172a, #111827 50%, #1e1b4b);
+      color: #f8fafc;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 20px;
+      overflow-x: hidden;
+    }
+
+    .game {
+      width: min(900px, 100%);
+      position: relative;
+      z-index: 2;
+    }
+
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 15px;
+      margin-bottom: 18px;
+    }
+
+    .brand {
+      font-size: clamp(22px, 4vw, 32px);
+      font-weight: 800;
+      letter-spacing: -.8px;
+    }
+
+    .brand span {
+      color: #60a5fa;
+    }
+
+    .stats {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+    }
+
+    .stat {
+      min-width: 90px;
+      padding: 9px 14px;
+      border: 1px solid rgba(255,255,255,.1);
+      background: rgba(255,255,255,.07);
+      border-radius: 14px;
+      text-align: center;
+      backdrop-filter: blur(12px);
+    }
+
+    .stat-label {
+      display: block;
+      font-size: 11px;
+      color: #94a3b8;
+      text-transform: uppercase;
+      letter-spacing: .8px;
+    }
+
+    .stat-value {
+      display: block;
+      margin-top: 2px;
+      font-size: 20px;
+      font-weight: 800;
+    }
+
+    .progress-wrap {
+      height: 7px;
+      width: 100%;
+      background: rgba(255,255,255,.08);
+      border-radius: 20px;
+      overflow: hidden;
+      margin-bottom: 18px;
+    }
+
+    .progress {
+      height: 100%;
+      width: 0%;
+      border-radius: inherit;
+      background: linear-gradient(90deg, #38bdf8, #818cf8, #c084fc);
+      transition: width .45s ease;
+    }
+
+    .card {
+      position: relative;
+      overflow: hidden;
+      padding: clamp(22px, 5vw, 42px);
+      border-radius: 28px;
+      border: 1px solid rgba(255,255,255,.12);
+      background: rgba(15, 23, 42, .78);
+      box-shadow:
+        0 30px 80px rgba(0,0,0,.35),
+        inset 0 1px 0 rgba(255,255,255,.05);
+      backdrop-filter: blur(18px);
+    }
+
+    .question-number {
+      color: #60a5fa;
+      font-size: 14px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+      margin-bottom: 12px;
+    }
+
+    .question {
+      font-size: clamp(20px, 4vw, 30px);
+      line-height: 1.4;
+      font-weight: 750;
+      margin-bottom: 28px;
+    }
+
+    .answers {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+    }
+
+    .answer {
+border: 1px solid rgba(255,255,255,.12);
+      background: rgba(255,255,255,.055);
+      color: #f8fafc;
+      border-radius: 18px;
+      padding: 18px;
+      min-height: 72px;
+      text-align: left;
+      cursor: pointer;
+      font-size: 16px;
+      line-height: 1.45;
+      transition:
+        transform .18s ease,
+        background .18s ease,
+        border-color .18s ease,
+        box-shadow .18s ease;
+      display: flex;
+      align-items: center;
+      gap: 13px;
+    }
+
+    .answer:hover:not(:disabled) {
+      transform: translateY(-3px);
+      background: rgba(96,165,250,.12);
+      border-color: rgba(96,165,250,.5);
+      box-shadow: 0 10px 25px rgba(0,0,0,.18);
+    }
+
+    .answer:focus-visible {
+      outline: 3px solid rgba(96,165,250,.6);
+      outline-offset: 3px;
+    }
+
+    .answer:disabled {
+      cursor: default;
+    }
+
+    .letter {
+      flex: 0 0 38px;
+      height: 38px;
+      border-radius: 11px;
+      display: grid;
+      place-items: center;
+      background: rgba(255,255,255,.09);
+      color: #cbd5e1;
+      font-weight: 900;
+    }
+
+    .answer.correct {
+      background: rgba(34,197,94,.18);
+      border-color: rgba(74,222,128,.7);
+      box-shadow: 0 0 25px rgba(34,197,94,.15);
+    }
+
+    .answer.correct .letter {
+      background: #22c55e;
+      color: white;
+    }
+
+    .answer.wrong {
+      background: rgba(239,68,68,.17);
+      border-color: rgba(248,113,113,.7);
+    }
+
+    .answer.wrong .letter {
+      background: #ef4444;
+      color: white;
+    }
+
+    .explanation {
+      display: none;
+      margin-top: 22px;
+      padding: 17px 19px;
+      border-radius: 16px;
+      background: rgba(59,130,246,.09);
+      border: 1px solid rgba(96,165,250,.2);
+      color: #cbd5e1;
+      line-height: 1.6;
+      animation: slideUp .3s ease;
+    }
+
+    .explanation strong {
+      color: #93c5fd;
+    }
+
+    .next-btn,
+    .restart-btn {
+      display: none;
+      width: 100%;
+      margin-top: 18px;
+      padding: 16px 20px;
+      border: 0;
+      border-radius: 16px;
+      background: linear-gradient(135deg, #3b82f6, #7c3aed);
+      color: white;
+      font-size: 16px;
+      font-weight: 800;
+      cursor: pointer;
+      transition: transform .18s ease, filter .18s ease;
+      box-shadow: 0 12px 30px rgba(59,130,246,.22);
+    }
+
+    .next-btn:hover,
+    .restart-btn:hover {
+      transform: translateY(-2px);
+      filter: brightness(1.1);
+    }
+
+    .game-over {
+      display: none;
+      text-align: center;
+      padding: 30px 10px 10px;
+    }
+
+    .game-over-icon {
+      font-size: 68px;
+      margin-bottom: 12px;
+      animation: pulse 1.5s infinite;
+    }
+
+    .game-over h2 {
+      font-size: clamp(30px, 7vw, 48px);
+      margin-bottom: 10px;
+    }
+
+    .final-score {
+      color: #93c5fd;
+      font-size: 22px;
+      font-weight: 700;
+      margin-bottom: 8px;
+    }
+
+    .final-message {
+      color: #94a3b8;
+      margin-bottom: 8px;
+      line-height: 1.6;
+    }
+
+    .restart-btn {
+      display: block;
+max-width: 280px;
+      margin: 22px auto 0;
+    }
+
+    .hint {
+      margin-top: 17px;
+      text-align: center;
+      color: #64748b;
+      font-size: 13px;
+    }
+
+    .hint kbd {
+      padding: 3px 7px;
+      border-radius: 6px;
+      border: 1px solid rgba(255,255,255,.13);
+      background: rgba(255,255,255,.07);
+      color: #cbd5e1;
+      font-weight: 700;
+    }
+
+    /* Pháo hoa */
+    #fireworks {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 20;
+      overflow: hidden;
+    }
+
+    .spark {
+      position: absolute;
+      width: 5px;
+      height: 5px;
+      border-radius: 50%;
+      background: white;
+      box-shadow: 0 0 8px currentColor, 0 0 16px currentColor;
+      animation: explode .75s cubic-bezier(.1,.7,.2,1) forwards;
+    }
+
+    @keyframes explode {
+      0% {
+        transform: translate(0,0) scale(1.2);
+        opacity: 1;
+      }
+      100% {
+        transform: translate(var(--x), var(--y)) scale(.15);
+        opacity: 0;
+      }
+    }
+
+    @keyframes slideUp {
+      from {
+        opacity: 0;
+        transform: translateY(8px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    @keyframes pulse {
+      0%,100% { transform: scale(1); }
+      50% { transform: scale(1.08); }
+    }
+
+    @media (max-width: 650px) {
+      body {
+        padding: 12px;
+        align-items: flex-start;
+      }
+
+      .header {
+        align-items: flex-start;
+        flex-direction: column;
+      }
+
+      .stats {
+        width: 100%;
+        justify-content: flex-start;
+      }
+
+      .stat {
+        flex: 1;
+      }
+
+      .card {
+        border-radius: 22px;
+      }
+
+      .answers {
+        grid-template-columns: 1fr;
+      }
+
+      .answer {
+        min-height: 65px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <div id="fireworks"></div>
+
+  <main class="game">
+
+    <header class="header">
+      <div class="brand">🧪 Đố Vui <span>Hóa Học</span></div>
+
+      <div class="stats">
+        <div class="stat">
+          <span class="stat-label">Điểm</span>
+          <span class="stat-value" id="score">0</span>
+        </div>
+
+        <div class="stat">
+          <span class="stat-label">Mạng</span>
+          <span class="stat-value" id="lives">❤️❤️❤️</span>
+        </div>
+
+        <div class="stat">
+          <span class="stat-label">Câu</span>
+          <span class="stat-value" id="counter">1/10</span>
+        </div>
+      </div>
+    </header>
+
+    <div class="progress-wrap">
+      <div class="progress" id="progress"></div>
+    </div>
+
+    <section class="card" id="quizCard">
+
+      <div id="quizContent">
+        <div class="question-number" id="questionNumber">
+          Câu hỏi 1
+        </div>
+
+        <h1 class="question" id="question"></h1>
+
+        <div class="answers" id="answers"></div>
+
+        <div class="explanation" id="explanation"></div>
+
+        <button class="next-btn" id="nextBtn">
+          Câu tiếp theo →
+</button>
+
+        <div class="hint">
+          Dùng chuột hoặc phím <kbd>A</kbd> <kbd>B</kbd> <kbd>C</kbd> <kbd>D</kbd> để trả lời
+        </div>
+      </div>
+
+      <div class="game-over" id="gameOver">
+        <div class="game-over-icon">🧪</div>
+        <h2>Game Over!</h2>
+        <div class="final-score" id="finalScore"></div>
+        <p class="final-message" id="finalMessage"></p>
+
+        <button class="restart-btn" id="restartBtn">
+          ↻ Chơi lại
+        </button>
+      </div>
+
+    </section>
+  </main>
+
+<script>
+  /*
+   * ============================================================
+   * ĐỐ VUI HÓA HỌC - ESTER & LIPID
+   * Không cần thư viện ngoài, có thể chạy trực tiếp bằng trình duyệt.
+   * ============================================================
+  */
+
+  const questions = [
+    {
+      question:
+        "Trong tự nhiên, ester CH₃COO(CH₂)₇CH₃ có mùi thơm đặc trưng của loại quả nào sau đây?",
+      options: [
+        "Quả chuối.",
+        "Quả dứa.",
+        "Quả cam.",
+        "Hoa nhài."
+      ],
+      answer: 2,
+      explanat
